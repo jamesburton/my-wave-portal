@@ -25,16 +25,34 @@ task(
   "hello",
   "Prints 'Hello, World!'");
 
-// task(
-//   "wave",
-//   "Waves with optional message")
-//   .addParam("account", "The waver's account address")
-//   .addOptionalParam("message", "The optional message")
-//   .setAction(async (taskArgs, hre/*, runSuper*/) => {
-//     // const balance = await ethers.provider.getBalance(taskArgs.account);
-//     // console.log(ethers.utils.formatEther(balance), "ETH");
-//     // TODO: Should call .wave on waveContract
-//   });
+task(
+  "wave",
+  "Waves with optional message")
+  // .addParam("account", "The waver's account address")
+  .addOptionalParam("contract", "The contract id to wave to")
+  .addOptionalParam("message", "The optional message")
+  .setAction(async (taskArgs, hre/*, runSuper*/) => {
+    // const { account } = taskArgs;
+    // const balance = await ethers.provider.getBalance(taskArgs.account);
+    // console.log(ethers.utils.formatEther(balance), "ETH");
+    // TODO: Should call .wave on waveContract
+
+    //const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
+    const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
+    const contractId = taskArgs.contract ?? (
+      // TEMPORARY SO DOESN'T WORK:- process.env.HARDHAT_NETWORK === 'hardhat' ? process.env.DEV_CONTRACT_ID :
+      process.env.HARDHAT_NETWORK === 'localhost' ? process.env.LOCALHOST_CONTRACT_ID :
+      process.env.HARDHAT_NETWORK === 'rinkeby' ? process.env.STAGING_CONTRACT_ID :
+      process.env.HARDHAT_NETWORK === 'mainnet' ? process.env.CONTRACT_ID :
+      undefined);
+    console.log(`contractId=${contractId}`);
+    // console.log(`account=${account}`);
+    const waveContract = await waveContractFactory.attach(contractId);
+    await waveContract.wave(taskArgs.message);
+    // await waveContract.connect(taskArgs.account).wave(taskArgs.message);
+    console.log(`Waved @ contract ${contractId}${(!taskArgs.message ? '' : ` ... message=${taskArgs.message}`)}`);
+    // console.log(`Waved from ${taskArgs.account} @ contract ${contractId}${(!taskArgs.message ? '' : ` ... message=${taskArgs.message}`)}`);
+  });
 
 // Display config if running (HARDHAT_NETWORK is missing on compile)
 if(process.env.HARDHAT_NETWORK) {
