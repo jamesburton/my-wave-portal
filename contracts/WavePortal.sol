@@ -11,9 +11,16 @@ contract WavePortal {
         console.log("The start of a SmartContract for sharing Waves");
     }
 
-    function wave() public {
+    function wave(string calldata waveMessage) public {
         totalWaves += 1;
         console.log("%s has waved!", msg.sender);
+        // if(waveMessage) {
+        if(bytes(waveMessage).length != 0) {
+            // console.log('  - with message: ' + waveMessage);
+            // console.log(string.concat('  - with message: ', waveMessage));
+            // string memory output = string.concat('  - with message:', waveMessage);
+            console.log(waveMessage);
+        }
     }
 
     function getTotalWaves() public view returns (uint256) {

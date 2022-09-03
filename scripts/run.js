@@ -20,12 +20,16 @@ const main = async () => {
 
     waveCount = await waveContract.getTotalWaves();
 
-    // waveTxn = await waveContract.connect(randomPerson).wave();
-    // await waveTxn.wait();
-    // Wave 3 times with random person
-    for(var i = 0; i < 3; i++) {
-        waveTxn = await waveContract.connect(randomPerson).wave();
-        await waveTxn.wait();
+    if(!!randomPerson) {
+        // waveTxn = await waveContract.connect(randomPerson).wave();
+        // await waveTxn.wait();
+        // Wave 3 times with random person
+        for(var i = 0; i < 3; i++) {
+            waveTxn = await waveContract.connect(randomPerson).wave();
+            await waveTxn.wait();
+        }
+    } else {
+        console.log(`randomPerson=${typeof randomPerson}, so no details to add additional waves ... skipping`);
     }
 
     waveCount = await waveContract.getTotalWaves();
