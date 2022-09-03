@@ -23,7 +23,8 @@ task("balance", "Prints an account's balance")
 
 task(
   "hello",
-  "Prints 'Hello, World!'");
+  "Prints 'Hello, World!'")
+  .setAction(() => { console.log('Hello, World!'); });
 
 task(
   "wave",
@@ -53,6 +54,23 @@ task(
     console.log(`Waved @ contract ${contractId}${(!taskArgs.message ? '' : ` ... message=${taskArgs.message}`)}`);
     // console.log(`Waved from ${taskArgs.account} @ contract ${contractId}${(!taskArgs.message ? '' : ` ... message=${taskArgs.message}`)}`);
   });
+
+task("messages", "Gets the stored messages")
+  .addOptionalParam("contract", "The id of the contract to connect to")
+  .setAction(async (taskArgs, hre) => {
+  const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
+  const contractId = taskArgs.contract ?? (
+    // TEMPORARY SO DOESN'T WORK:- process.env.HARDHAT_NETWORK === 'hardhat' ? process.env.DEV_CONTRACT_ID :
+    process.env.HARDHAT_NETWORK === 'localhost' ? process.env.LOCALHOST_CONTRACT_ID :
+    process.env.HARDHAT_NETWORK === 'rinkeby' ? process.env.STAGING_CONTRACT_ID :
+    process.env.HARDHAT_NETWORK === 'mainnet' ? process.env.CONTRACT_ID :
+    undefined);
+  console.log(`contractId=${contractId}`);
+  // console.log(`account=${account}`);
+  const waveContract = await waveContractFactory.attach(contractId);
+  const messages = await waveContract.getMessages();
+  console.log('messages=', JSON.stringify(messages));
+});
 
 // Display config if running (HARDHAT_NETWORK is missing on compile)
 if(process.env.HARDHAT_NETWORK) {
