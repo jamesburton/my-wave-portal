@@ -52,7 +52,7 @@ const main = async () => {
       /*
         * Send Wave
         */
-      let waveTxn = await waveContract.wave(`Deployment wave on ${process.env.HARDHAT_NETWORK}!`);
+      let waveTxn = await waveContract.wave("A message!");
       await waveTxn.wait();
 
       /*
@@ -60,7 +60,7 @@ const main = async () => {
       */
       contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
       console.log(
-        "Contract balance (after):",
+        "Contract balance:",
         hre.ethers.utils.formatEther(contractBalance)
       );
 

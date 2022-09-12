@@ -10,6 +10,11 @@ contract WavePortal {
     uint256 totalWaves;
 
     /*
+     * We will be using this below to help generate a random number
+     */
+    uint256 private seed;
+
+    /*
      * A little magic, Google what events are in Solidity!
      */
     event NewWave(address indexed from, uint256 timestamp, string message);
@@ -28,27 +33,74 @@ contract WavePortal {
      * I declare a variable waves that lets me store an array of structs.
      * This is what lets me hold all the waves anyone ever sends to me!
      */
-    Wave[] waves;
+    //Wave[] waves;
+    mapping(uint256 => Wave) public waves;
 
-    // constructor() {
+    /*
+     * This is an address => uint mapping, meaning I can associate an address with a number!
+     * In this case, I'll be storing the address with the last time the user waved at us.
+     */
+    mapping(address => uint256) public lastWavedAt;
+
     // NB: We needed to add "payable" to enable contract to hold and send funds 
     constructor() payable {
         console.log("The start of a SmartContract for sharing Waves");
+        /*
+         * Set the initial seed
+         */
+        seed = (block.timestamp + block.difficulty) % 100;
     }
 
-    /*
-     * You'll notice I changed the wave function a little here as well and
-     * now it requires a string called _message. This is the message our user
-     * sends us from the frontend!
-     */
     function wave(string memory _message) public {
+        // Check last waved and block if too recent:-
+        /*
+         * We need to make sure the current timestamp is at least 15-minutes bigger than the last timestamp we stored
+         */
+        require(
+            lastWavedAt[msg.sender] + 15 minutes < block.timestamp,
+            "Wait 15m"
+        );
+        // require(
+        //     lastWavedAt[msg.sender] + 15 seconds < block.timestamp,
+        //     "Wait 15s"
+        // );
+
+        /*
+         * Update the current timestamp we have for the user
+         */
+        lastWavedAt[msg.sender] = block.timestamp;
+
         totalWaves += 1;
         console.log("%s waved w/ message %s", msg.sender, _message);
 
+        //waves.push(Wave(msg.sender, _message, block.timestamp));
+        waves[totalWaves - 1] = Wave(msg.sender, _message, block.timestamp);
+        
         /*
-         * This is where I actually store the wave data in the array.
+         * Generate a new seed for the next user that sends a wave
          */
-        waves.push(Wave(msg.sender, _message, block.timestamp));
+        seed = (block.difficulty + block.timestamp + seed) % 100;
+
+        console.log("Random # generated: %d", seed);
+
+        /*
+         * Give a 25% chance that the user wins the prize.
+         */
+        if (seed < 25) {
+            console.log("%s won!", msg.sender);
+
+            /*
+             * The same code we had before to send the prize.
+             */
+            uint256 prizeAmount = 0.0001 ether;
+            // uint256 prizeAmount = 0.00001 ether;
+            require(
+                prizeAmount <= address(this).balance,
+                "Trying to withdraw more money than the contract has."
+            );
+            (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+            require(success, "Failed to withdraw money from contract.");
+        }
 
         /*
          * I added some fanciness here, Google it and try to figure out what it is!
@@ -56,23 +108,32 @@ contract WavePortal {
          */
         emit NewWave(msg.sender, block.timestamp, _message);
 
-        // Add prize (see https://buildspace.so/p/build-solidity-web3-app/lessons/fund-contract-send-prize-ethereum-users)
-        //uint256 prizeAmount = 0.0001 ether;
-        uint256 prizeAmount = 0.00001 ether;
-        require(
-            prizeAmount <= address(this).balance,
-            "Trying to withdraw more money than the contract has."
-        );
-        (bool success, ) = (msg.sender).call{value: prizeAmount}("");
-        require(success, "Failed to withdraw money from contract.");
+        // Moved to random block above
+        // // Add prize (see https://buildspace.so/p/build-solidity-web3-app/lessons/fund-contract-send-prize-ethereum-users)
+        // //uint256 prizeAmount = 0.0001 ether;
+        // uint256 prizeAmount = 0.00001 ether;
+        // require(
+        //     prizeAmount <= address(this).balance,
+        //     "Trying to withdraw more money than the contract has."
+        // );
+        // (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+        // require(success, "Failed to withdraw money from contract.");
     }
 
     /*
      * I added a function getAllWaves which will return the struct array, waves, to us.
      * This will make it easy to retrieve the waves from our website!
      */
+    // function getAllWaves() public view returns (Wave[] memory) {
+    //     return waves;
+    // }
     function getAllWaves() public view returns (Wave[] memory) {
-        return waves;
+        Wave[] memory _waves = new Wave[](totalWaves);
+        for(uint i=0; i < totalWaves; i++) {
+            //_waves.push[waves[i]];
+            _waves[i] = waves[i];
+        }
+        return _waves;
     }
 
     function getTotalWaves() public view returns (uint256) {

@@ -9,7 +9,8 @@
     "compile": "hardhat compile",
     "start-node": "hardhat node",
     "dev": "hardhat run scripts/deploy.js --network localhost",
-    "deploy": "hardhat run scripts/deploy.js"
+    "deploy": "hardhat run scripts/deploy.js",
+    "wave": "hardhat run scripts/wave.js"
   },
   "keywords": [],
   "author": "",
