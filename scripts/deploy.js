@@ -6,11 +6,29 @@ const main = async () => {
     console.log("Account balance: ", accountBalance.toString());
   
     const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
-    const waveContract = await waveContractFactory.deploy();
+    // const waveContract = await waveContractFactory.deploy();
+    // Deploy with contract funds for prizes
+    // const funds = "0.1";
+    const initialContractFunds = process.env.HARDHAT_NETWORK === 'mainnet' ? "0.01" : "0.1";
+    const waveContract = await waveContractFactory.deploy({
+      value: hre.ethers.utils.parseEther(initialContractFunds),
+    });
     await waveContract.deployed();
   
     console.log("WavePortal address: ", waveContract.address);
 
+    /*
+      * Get Contract balance
+      */
+    let contractBalance = await hre.ethers.provider.getBalance(
+      waveContract.address
+    );
+    console.log(
+      "Contract balance:",
+      hre.ethers.utils.formatEther(contractBalance)
+    );
+
+    /*
     let waveCount;
     waveCount = await waveContract.getTotalWaves();
     console.log(waveCount.toNumber());
@@ -28,6 +46,27 @@ const main = async () => {
     let allWaves = await waveContract.getAllWaves();
     console.log(allWaves);
     */
+
+    if(process.env.HARDHAT_NETWORK !== 'mainnet') {
+      // *** Test a wave and re-check balance
+      /*
+        * Send Wave
+        */
+      let waveTxn = await waveContract.wave("A message!");
+      await waveTxn.wait();
+
+      /*
+      * Get Contract balance to see what happened!
+      */
+      contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
+      console.log(
+        "Contract balance:",
+        hre.ethers.utils.formatEther(contractBalance)
+      );
+
+      let allWaves = await waveContract.getAllWaves();
+      console.log(allWaves);
+    }
   };
   
   const runMain = async () => {

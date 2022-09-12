@@ -30,7 +30,9 @@ contract WavePortal {
      */
     Wave[] waves;
 
-    constructor() {
+    // constructor() {
+    // NB: We needed to add "payable" to enable contract to hold and send funds 
+    constructor() payable {
         console.log("The start of a SmartContract for sharing Waves");
     }
 
@@ -54,6 +56,15 @@ contract WavePortal {
          */
         emit NewWave(msg.sender, block.timestamp, _message);
 
+        // Add prize (see https://buildspace.so/p/build-solidity-web3-app/lessons/fund-contract-send-prize-ethereum-users)
+        //uint256 prizeAmount = 0.0001 ether;
+        uint256 prizeAmount = 0.00001 ether;
+        require(
+            prizeAmount <= address(this).balance,
+            "Trying to withdraw more money than the contract has."
+        );
+        (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+        require(success, "Failed to withdraw money from contract.");
     }
 
     /*
