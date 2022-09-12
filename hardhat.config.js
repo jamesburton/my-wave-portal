@@ -107,7 +107,7 @@ if(process.env.PROD_QUICKNODE_URL?.length)
     url: process.env.PROD_QUICKNODE_URL,
     accounts: [process.env.PRIVATE_KEY],
   };
-const defaultNetwork = 'localhost';
+// const defaultNetwork = 'localhost';
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {

@@ -23,31 +23,14 @@ const main = async () => {
     console.log("Connected to contract:", waveContract.address);
     console.log("Connected with user:", me.address);
 
-    // let waveCount;
-    // waveCount = await waveContract.getTotalWaves();
-
-    // //let waveTxn = await waveContract.wave('Example message');
-    // let waveTxn = await waveContract.wave();
-    // await waveTxn.wait();
-
-    // waveCount = await waveContract.getTotalWaves();
-
     let waveCount;
     waveCount = await waveContract.getTotalWaves();
-    console.log(waveCount.toNumber());
-  
-    /**
-     * Let's send a few waves!
-     */
-    let waveTxn = await waveContract.wave("A message!");
-    await waveTxn.wait(); // Wait for the transaction to be mined
-  
-    const [_, randomPerson] = await hre.ethers.getSigners();
-    waveTxn = await waveContract.connect(randomPerson).wave("Another message!");
-    await waveTxn.wait(); // Wait for the transaction to be mined
-  
-    let allWaves = await waveContract.getAllWaves();
-    console.log(allWaves);
+
+    //let waveTxn = await waveContract.wave('Example message');
+    let waveTxn = await waveContract.wave();
+    await waveTxn.wait();
+
+    waveCount = await waveContract.getTotalWaves();
   };
   
   const runMain = async () => {
